@@ -1,4 +1,5 @@
 import asyncio
+import pygame
 from game import Game
 # Trigger rebuild
 
