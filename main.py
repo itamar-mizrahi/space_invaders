@@ -213,7 +213,9 @@ def game_loop(highscore):
             if event.type == pygame.QUIT:
                 pygame.quit(); sys.exit()
             if event.type == pygame.KEYDOWN and not game_over:
-                if event.key == pygame.K_p:
+                if event.key == pygame.K_ESCAPE:
+                    return highscore # Return to main menu
+                elif event.key == pygame.K_p:
                     paused = not paused
                 elif event.key == pygame.K_SPACE and len(player_bullets) < 5 and not paused:
                     if player.double_shot:
