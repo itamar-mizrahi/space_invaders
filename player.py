@@ -14,6 +14,7 @@ class Player:
         self.lives = 3
         self.double_shot = False
         self.pierce_shot = False
+        self.spread_shot = False
         self.powerup_timer = 0
         self.shield_active = False
         
@@ -35,11 +36,12 @@ class Player:
             self.rect.x += self.speed
 
     def update(self):
-        if self.double_shot or self.pierce_shot:
+        if self.double_shot or self.pierce_shot or self.spread_shot:
             self.powerup_timer -= 1
             if self.powerup_timer <= 0:
                 self.double_shot = False
                 self.pierce_shot = False
+                self.spread_shot = False
 
     def activate_double_shot(self, duration_frames):
         self.double_shot = True
@@ -49,6 +51,13 @@ class Player:
     def activate_pierce_shot(self, duration_frames):
         self.pierce_shot = True
         self.double_shot = False
+        self.spread_shot = False
+        self.powerup_timer = duration_frames
+
+    def activate_spread_shot(self, duration_frames):
+        self.spread_shot = True
+        self.double_shot = False
+        self.pierce_shot = False
         self.powerup_timer = duration_frames
         
     def activate_shield(self):

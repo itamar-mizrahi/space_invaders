@@ -24,9 +24,9 @@ def create_boss(wave):
     return [BossAlien(SCREEN_WIDTH // 2 - 75, 50, hp)]
 
 def spawn_powerup(x, y, wave):
-    types = ['double', 'double', 'pierce', 'life']
+    types = ['double', 'double', 'pierce', 'life', 'spread']
     if wave >= 4:
-        types.extend(['shield', 'shield'])
+        types.extend(['shield', 'shield', 'spread'])
     return PowerUp(x, y, random.choice(types))
 
 class PlayState(BaseState):
@@ -53,6 +53,7 @@ class PlayState(BaseState):
         self.boss_hits_taken  = 0
         self.score            = 0
         self.paused           = False
+        self.shoot_cooldown   = 0
 
     def take_damage(self):
         if self.player.shield_active:
@@ -71,16 +72,6 @@ class PlayState(BaseState):
                     self.game.change_state_replace(MenuState(self.game))
                 elif event.key == pygame.K_p:
                     self.paused = not self.paused
-                elif event.key == pygame.K_SPACE and len(self.player_bullets) < 5 and not self.paused:
-                    if self.player.double_shot:
-                        for bx in [self.player.rect.left, self.player.rect.right - 5]:
-                            self.player_bullets.append(Bullet(bx, self.player.rect.top, -7, YELLOW))
-                    elif self.player.pierce_shot:
-                        self.player_bullets.append(Bullet(self.player.rect.centerx - 5, self.player.rect.top,
-                                                      -7, PURPLE, piercing=True))
-                    else:
-                        self.player_bullets.append(Bullet(self.player.rect.centerx - 2, self.player.rect.top, -7, YELLOW))
-                    self.snd_shoot.play()
 
     def update(self):
         if self.paused:
@@ -90,6 +81,24 @@ class PlayState(BaseState):
         if keys[pygame.K_LEFT]:  self.player.move_left()
         if keys[pygame.K_RIGHT]: self.player.move_right()
         self.player.update()
+        
+        if self.shoot_cooldown > 0:
+            self.shoot_cooldown -= 1
+            
+        if keys[pygame.K_SPACE] and self.shoot_cooldown <= 0 and len(self.player_bullets) < 5:
+            if self.player.double_shot:
+                for bx in [self.player.rect.left, self.player.rect.right - 5]:
+                    self.player_bullets.append(Bullet(bx, self.player.rect.top, -7, YELLOW))
+            elif self.player.pierce_shot:
+                self.player_bullets.append(Bullet(self.player.rect.centerx - 5, self.player.rect.top, -7, PURPLE, piercing=True))
+            elif self.player.spread_shot:
+                self.player_bullets.append(Bullet(self.player.rect.centerx - 2, self.player.rect.top, -7, YELLOW))
+                self.player_bullets.append(Bullet(self.player.rect.centerx - 2, self.player.rect.top, -7, YELLOW, speed_x=-3))
+                self.player_bullets.append(Bullet(self.player.rect.centerx - 2, self.player.rect.top, -7, YELLOW, speed_x=3))
+            else:
+                self.player_bullets.append(Bullet(self.player.rect.centerx - 2, self.player.rect.top, -7, YELLOW))
+            self.snd_shoot.play()
+            self.shoot_cooldown = 15  # Cooldown frames between shots
 
         for b in self.player_bullets[:]:
             b.update()
@@ -111,6 +120,7 @@ class PlayState(BaseState):
             if p.rect.colliderect(self.player.rect):
                 if p.type == 'double':   self.player.activate_double_shot(FPS * 10)
                 elif p.type == 'pierce': self.player.activate_pierce_shot(FPS * 5)
+                elif p.type == 'spread': self.player.activate_spread_shot(FPS * 7)
                 elif p.type == 'life':   self.player.lives += 1
                 elif p.type == 'shield': self.player.activate_shield()
                 self.powerups.remove(p)
@@ -222,4 +232,7 @@ class PlayState(BaseState):
             screen.blit(t, (SCREEN_WIDTH // 2 - t.get_width() // 2, SCREEN_HEIGHT - 30))
         elif self.player.pierce_shot:
             t = self.game.font.render("PIERCING SHOT!", True, PURPLE)
+            screen.blit(t, (SCREEN_WIDTH // 2 - t.get_width() // 2, SCREEN_HEIGHT - 30))
+        elif self.player.spread_shot:
+            t = self.game.font.render("SPREAD SHOT!", True, GREEN if 'GREEN' in globals() else (0, 255, 0))
             screen.blit(t, (SCREEN_WIDTH // 2 - t.get_width() // 2, SCREEN_HEIGHT - 30))
