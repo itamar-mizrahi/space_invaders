@@ -205,6 +205,7 @@ def game_loop(highscore):
     boss_hits_taken  = 0
     score            = 0
     game_over        = False
+    paused           = False
 
     while True:
         # Events
@@ -212,7 +213,9 @@ def game_loop(highscore):
             if event.type == pygame.QUIT:
                 pygame.quit(); sys.exit()
             if event.type == pygame.KEYDOWN and not game_over:
-                if event.key == pygame.K_SPACE and len(player_bullets) < 5:
+                if event.key == pygame.K_p:
+                    paused = not paused
+                elif event.key == pygame.K_SPACE and len(player_bullets) < 5 and not paused:
                     if player.double_shot:
                         for bx in [player.rect.left, player.rect.right - 5]:
                             player_bullets.append(Bullet(bx, player.rect.top, -7, YELLOW))
@@ -223,7 +226,7 @@ def game_loop(highscore):
                         player_bullets.append(Bullet(player.rect.centerx - 2, player.rect.top, -7, YELLOW))
                     snd_shoot.play()
 
-        if not game_over:
+        if not game_over and not paused:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_LEFT]:  player.move_left()
             if keys[pygame.K_RIGHT]: player.move_right()
@@ -368,6 +371,10 @@ def game_loop(highscore):
         for b in enemy_bullets:  b.draw(screen)
         for a in aliens:      a.draw(screen)
         for e in explosions:  e.draw(screen)
+        
+        if paused:
+            pt = large_font.render("PAUSED", True, YELLOW)
+            screen.blit(pt, (SCREEN_WIDTH // 2 - pt.get_width() // 2, SCREEN_HEIGHT // 2))
 
         # UI
         screen.blit(font.render(f"Score: {score}",   True, WHITE), (10, 10))
