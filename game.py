@@ -1,6 +1,8 @@
 import pygame
 import sys
 import random
+import asyncio
+import random
 from settings import *
 
 class Game:
@@ -49,7 +51,7 @@ class Game:
             pygame.quit()
             sys.exit()
 
-    def run(self):
+    async def run(self):
         # Local import to avoid circular dependency
         from states.menu import MenuState
         self.change_state(MenuState(self))
@@ -75,3 +77,4 @@ class Game:
 
             pygame.display.flip()
             self.clock.tick(FPS)
+            await asyncio.sleep(0)
