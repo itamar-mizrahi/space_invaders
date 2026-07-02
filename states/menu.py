@@ -16,6 +16,9 @@ class MenuState(BaseState):
                     self.game.change_state_replace(PlayState(self.game))
                 elif event.key == pygame.K_ESCAPE:
                     self.game.running = False
+            elif event.type in (pygame.MOUSEBUTTONDOWN, pygame.FINGERDOWN):
+                from states.play import PlayState
+                self.game.change_state_replace(PlayState(self.game))
 
     def update(self):
         self.blink_timer += 1
@@ -33,8 +36,10 @@ class MenuState(BaseState):
         screen.blit(hs_text, (SCREEN_WIDTH // 2 - hs_text.get_width() // 2, 330))
 
         if self.show_prompt:
-            prompt = self.game.font.render("Press SPACE to Play", True, WHITE)
+            prompt = self.game.font.render("Press SPACE or Tap to Play", True, WHITE)
             screen.blit(prompt, (SCREEN_WIDTH // 2 - prompt.get_width() // 2, 400))
 
-        ctrl = self.game.font.render("← → to move  |  SPACE to shoot", True, GRAY)
-        screen.blit(ctrl, (SCREEN_WIDTH // 2 - ctrl.get_width() // 2, 480))
+        ctrl = self.game.font.render("← → to move / SPACE to shoot", True, GRAY)
+        screen.blit(ctrl, (SCREEN_WIDTH // 2 - ctrl.get_width() // 2, 460))
+        ctrl2 = self.game.font.render("Mobile: Drag to move & auto-fire", True, GRAY)
+        screen.blit(ctrl2, (SCREEN_WIDTH // 2 - ctrl2.get_width() // 2, 490))

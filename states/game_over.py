@@ -16,6 +16,10 @@ class GameOverState(BaseState):
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 from states.play import PlayState
                 self.game.change_state_replace(PlayState(self.game))
+            elif event.type in (pygame.MOUSEBUTTONDOWN, pygame.FINGERDOWN):
+                if self.timer > 90:
+                    from states.play import PlayState
+                    self.game.change_state_replace(PlayState(self.game))
 
     def update(self):
         self.timer += 1
@@ -36,5 +40,5 @@ class GameOverState(BaseState):
             screen.blit(new_rec, (SCREEN_WIDTH // 2 - new_rec.get_width() // 2, 350))
 
         if self.timer > 90:
-            prompt = self.game.font.render("Press SPACE to Play Again", True, WHITE)
+            prompt = self.game.font.render("Press SPACE or Tap to Play Again", True, WHITE)
             screen.blit(prompt, (SCREEN_WIDTH // 2 - prompt.get_width() // 2, 430))

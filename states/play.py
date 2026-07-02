@@ -52,6 +52,7 @@ class PlayState(BaseState):
         self.score            = 0
         self.paused           = False
         self.shoot_cooldown   = 0
+        self.is_touching      = False
 
     def take_damage(self):
         if self.player.shield_active:
@@ -71,6 +72,16 @@ class PlayState(BaseState):
                     self.game.change_state_replace(MenuState(self.game))
                 elif event.key == pygame.K_p:
                     self.paused = not self.paused
+            elif event.type in (pygame.MOUSEBUTTONDOWN, pygame.FINGERDOWN):
+                self.is_touching = True
+                x = event.pos[0] if hasattr(event, 'pos') else event.x * SCREEN_WIDTH
+                self.player.rect.centerx = x
+            elif event.type in (pygame.MOUSEBUTTONUP, pygame.FINGERUP):
+                self.is_touching = False
+            elif event.type in (pygame.MOUSEMOTION, pygame.FINGERMOTION):
+                if self.is_touching:
+                    x = event.pos[0] if hasattr(event, 'pos') else event.x * SCREEN_WIDTH
+                    self.player.rect.centerx = x
 
     def update(self):
         if self.paused:
@@ -84,7 +95,7 @@ class PlayState(BaseState):
         if self.shoot_cooldown > 0:
             self.shoot_cooldown -= 1
             
-        if keys[pygame.K_SPACE] and self.shoot_cooldown <= 0 and len(self.player_bullets) < 5:
+        if (keys[pygame.K_SPACE] or self.is_touching) and self.shoot_cooldown <= 0 and len(self.player_bullets) < 5:
             if self.player.double_shot:
                 for bx in [self.player.rect.left, self.player.rect.right - 5]:
                     self.player_bullets.append(Bullet(bx, self.player.rect.top, -7, YELLOW))
