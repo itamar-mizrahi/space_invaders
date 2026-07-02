@@ -10,10 +10,12 @@ class MenuState(BaseState):
 
     def get_events(self, events):
         for event in events:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                # Local import to avoid circular dependency
-                from states.play import PlayState
-                self.game.change_state_replace(PlayState(self.game))
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    from states.play import PlayState
+                    self.game.change_state_replace(PlayState(self.game))
+                elif event.key == pygame.K_ESCAPE:
+                    self.game.running = False
 
     def update(self):
         self.blink_timer += 1

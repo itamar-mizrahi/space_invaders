@@ -2,8 +2,6 @@ import pygame
 import random
 from settings import *
 from states.base import BaseState
-from states.game_over import GameOverState
-from states.menu import MenuState
 from player import Player
 from bullet import Bullet
 from alien import Alien, BossAlien
@@ -69,6 +67,7 @@ class PlayState(BaseState):
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
+                    from states.menu import MenuState
                     self.game.change_state_replace(MenuState(self.game))
                 elif event.key == pygame.K_p:
                     self.paused = not self.paused
@@ -111,9 +110,10 @@ class PlayState(BaseState):
                 self.enemy_bullets.remove(b)
             elif b.rect.colliderect(self.player.rect):
                 self.enemy_bullets.remove(b)
-                if self.take_damage():
-                    self.game.change_state_replace(GameOverState(self.game, self.score))
-                    return
+                if self.player.lives <= 0:
+                    from states.game_over import GameOverState
+                    self.game.change_state_replace(GameOverState(self.game, self.score, self.wave))
+                return
 
         for p in self.powerups[:]:
             p.update()
@@ -145,7 +145,8 @@ class PlayState(BaseState):
                 a.update(0, self.alien_drop)
                 if a.rect.bottom >= self.player.rect.top:
                     if self.take_damage():
-                        self.game.change_state_replace(GameOverState(self.game, self.score))
+                        from states.game_over import GameOverState
+                        self.game.change_state_replace(GameOverState(self.game, self.score, self.wave))
                         return
                     else:
                         if self.is_boss_wave:
