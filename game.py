@@ -7,7 +7,8 @@ from settings import *
 
 class Game:
     def __init__(self):
-        pygame.init()
+        pygame.display.init()
+        pygame.font.init()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Space Invaders")
         self.clock = pygame.time.Clock()
